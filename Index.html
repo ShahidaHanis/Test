@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuiz Interaktif: Keluarga Saya Sayang</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+
         .quiz-container {
             max-width: 600px;
             margin: 2rem auto;
@@ -22,6 +25,7 @@
             padding: 2rem;
             backdrop-filter: blur(10px);
         }
+
         .option-btn {
             display: block;
             width: 100%;
@@ -35,34 +39,56 @@
             cursor: pointer;
             background: white;
         }
-        .option-btn:hover {
+
+        .option-btn:hover:not(:disabled) {
             border-color: #3b82f6;
             background-color: #eff6ff;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
+
         .option-btn.correct {
             background-color: #dcfce7;
             border-color: #22c55e;
             color: #15803d;
             font-weight: 600;
         }
+
         .option-btn.incorrect {
             background-color: #fee2e2;
             border-color: #ef4444;
             color: #b91c1c;
             font-weight: 600;
         }
+
         .option-btn:disabled {
             cursor: not-allowed;
             opacity: 0.7;
         }
+
         .family-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
         }
+
         .progress-animation {
             transition: width 0.5s ease-in-out;
+        }
+
+        /* Animasi Fade-in untuk soalan baru */
+        #question-container.fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -70,7 +96,6 @@
 
     <div id="quiz-app" class="quiz-container text-center">
         
-        <!-- Start Screen -->
         <div id="start-screen">
             <div class="family-icon">👨‍👩‍👧‍👦</div>
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Kuiz Keluarga Saya</h1>
@@ -80,10 +105,9 @@
             </button>
         </div>
 
-        <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden">
             <div class="flex justify-between items-center mb-4">
-                <span id="question-counter" class="text-sm font-semibold text-gray-600">Soalan 1 daripada 8</span>
+                <span id="question-counter" class="text-sm font-semibold text-gray-600"></span>
                 <span id="score-counter" class="text-sm font-semibold text-blue-600">Skor: 0</span>
             </div>
             <div id="progress-container" class="w-full bg-gray-200 rounded-full h-3 mb-6">
@@ -99,9 +123,8 @@
             </button>
         </div>
 
-        <!-- Result Screen -->
         <div id="result-screen" class="hidden">
-            <div id="result-icon" class="text-6xl mb-4">🎉</div>
+            <div id="result-icon" class="text-6xl mb-4"></div>
             <h1 class="text-3xl font-bold text-gray-800 mb-4">Tahniah!</h1>
             <p class="text-lg text-gray-600 mb-6">Anda telah menyelesaikan kuiz keluarga.</p>
             <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-6">
@@ -116,195 +139,204 @@
     </div>
 
     <script>
-        const quizData = [
-            {
-                question: "Siapakah ibu kepada ibu kita?",
-                options: ["Kakak", "Nenek", "Adik"],
-                answer: "Nenek",
-                icon: "👵"
-            },
-            {
-                question: "Anak lelaki kepada ibu bapa kita dipanggil...",
-                options: ["Abang", "Adik lelaki", "Sepupu"],
-                answer: "Adik lelaki",
-                icon: "👦"
-            },
-            {
-                question: "Siapakah suami kepada ibu kita?",
-                options: ["Pakcik", "Bapa", "Datuk"],
-                answer: "Bapa",
-                icon: "👨"
-            },
-            {
-                question: "Anak perempuan kepada adik beradik ibu bapa kita dipanggil...",
-                options: ["Sepupu", "Kakak", "Nenek"],
-                answer: "Sepupu",
-                icon: "👧"
-            },
-            {
-                question: "Siapakah abang kepada ibu atau bapa kita?",
-                options: ["Datuk", "Pakcik", "Sepupu"],
-                answer: "Pakcik",
-                icon: "👨‍🦱"
-            },
-            {
-                question: "Ibu kepada suami atau isteri kita dipanggil...",
-                options: ["Mertua", "Nenek", "Makcik"],
-                answer: "Mertua",
-                icon: "👩‍🦳"
-            },
-            {
-                question: "Anak kepada anak kita dipanggil...",
-                options: ["Sepupu", "Cucu", "Cicit"],
-                answer: "Cucu",
-                icon: "👶"
-            },
-            {
-                question: "Adik perempuan kepada ibu atau bapa kita dipanggil...",
-                options: ["Makcik", "Kakak", "Sepupu"],
-                answer: "Makcik",
-                icon: "👩"
-            }
-        ];
+        document.addEventListener('DOMContentLoaded', () => {
 
-        let currentQuestion = 0;
-        let score = 0;
-        let selectedAnswer = null;
+            const quizData = [
+                {
+                    question: "Siapakah ibu kepada ibu kita?",
+                    options: ["Kakak", "Nenek", "Adik"],
+                    answer: "Nenek",
+                    icon: "👵"
+                },
+                {
+                    question: "Anak lelaki kepada ibu bapa kita dipanggil...",
+                    options: ["Abang", "Adik lelaki", "Sepupu"],
+                    answer: "Adik lelaki",
+                    icon: "👦"
+                },
+                {
+                    question: "Siapakah suami kepada ibu kita?",
+                    options: ["Pakcik", "Bapa", "Datuk"],
+                    answer: "Bapa",
+                    icon: "👨"
+                },
+                {
+                    question: "Anak perempuan kpd adik-beradik ibu/bapa kita dipanggil...",
+                    options: ["Sepupu", "Kakak", "Nenek"],
+                    answer: "Sepupu",
+                    icon: "👧"
+                },
+                {
+                    question: "Siapakah abang kepada ibu atau bapa kita?",
+                    options: ["Datuk", "Pakcik", "Sepupu"],
+                    answer: "Pakcik",
+                    icon: "👨‍🦱"
+                },
+                {
+                    question: "Ibu kepada suami atau isteri kita dipanggil...",
+                    options: ["Mertua", "Nenek", "Makcik"],
+                    answer: "Mertua",
+                    icon: "👩‍🦳"
+                },
+                {
+                    question: "Anak kepada anak kita dipanggil...",
+                    options: ["Sepupu", "Cucu", "Cicit"],
+                    answer: "Cucu",
+                    icon: "👶"
+                },
+                {
+                    question: "Adik perempuan kepada ibu atau bapa kita dipanggil...",
+                    options: ["Makcik", "Kakak", "Sepupu"],
+                    answer: "Makcik",
+                    icon: "👩"
+                },
+                {
+                    question: "Bapa kepada bapa kita dipanggil...",
+                    options: ["Moyang", "Pak Long", "Datuk"],
+                    answer: "Datuk",
+                    icon: "👴"
+                },
+                {
+                    question: "Adik-beradik kepada isteri atau suami kita dipanggil...",
+                    options: ["Sepupu", "Ipar", "Birasan"],
+                    answer: "Ipar",
+                    icon: "🧑‍🤝‍🧑"
+                }
+            ];
 
-        // DOM elements
-        const startScreen = document.getElementById('start-screen');
-        const quizScreen = document.getElementById('quiz-screen');
-        const resultScreen = document.getElementById('result-screen');
-        const startBtn = document.getElementById('start-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const restartBtn = document.getElementById('restart-btn');
-        const questionText = document.getElementById('question-text');
-        const optionsContainer = document.getElementById('options-container');
-        const progressBar = document.getElementById('progress-bar');
-        const scoreText = document.getElementById('score-text');
-        const questionCounter = document.getElementById('question-counter');
-        const scoreCounter = document.getElementById('score-counter');
-        const imageContainer = document.getElementById('image-container');
-        const resultIcon = document.getElementById('result-icon');
-        const performanceText = document.getElementById('performance-text');
+            let currentQuestion = 0;
+            let score = 0;
+            let shuffledQuestions = [];
 
-        // Event listeners
-        startBtn.addEventListener('click', startQuiz);
-        nextBtn.addEventListener('click', nextQuestion);
-        restartBtn.addEventListener('click', restartQuiz);
+            // DOM elements
+            const startScreen = document.getElementById('start-screen');
+            const quizScreen = document.getElementById('quiz-screen');
+            const resultScreen = document.getElementById('result-screen');
+            const startBtn = document.getElementById('start-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const questionContainer = document.getElementById('question-container');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const progressBar = document.getElementById('progress-bar');
+            const scoreText = document.getElementById('score-text');
+            const questionCounter = document.getElementById('question-counter');
+            const scoreCounter = document.getElementById('score-counter');
+            const imageContainer = document.getElementById('image-container');
+            const resultIcon = document.getElementById('result-icon');
+            const performanceText = document.getElementById('performance-text');
 
-        function startQuiz() {
-            startScreen.classList.add('hidden');
-            quizScreen.classList.remove('hidden');
-            currentQuestion = 0;
-            score = 0;
-            updateScoreCounter();
-            loadQuestion();
-        }
+            // Event listeners
+            startBtn.addEventListener('click', startQuiz);
+            nextBtn.addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restartQuiz);
 
-        function loadQuestion() {
-            const question = quizData[currentQuestion];
-            questionText.textContent = question.question;
-            
-            // Update question counter
-            questionCounter.textContent = `Soalan ${currentQuestion + 1} daripada ${quizData.length}`;
-            
-            // Update progress bar
-            const progress = ((currentQuestion + 1) / quizData.length) * 100;
-            progressBar.style.width = `${progress}%`;
-            
-            // Display icon
-            imageContainer.innerHTML = `<div style="font-size: 3rem; margin-bottom: 1rem;">${question.icon}</div>`;
-            
-            // Clear previous options
-            optionsContainer.innerHTML = '';
-            selectedAnswer = null;
-            nextBtn.classList.add('hidden');
-            
-            // Create option buttons
-            question.options.forEach(option => {
-                const button = document.createElement('button');
-                button.className = 'option-btn';
-                button.textContent = option;
-                button.addEventListener('click', () => selectAnswer(option, button));
-                optionsContainer.appendChild(button);
-            });
-        }
-
-        function selectAnswer(answer, buttonElement) {
-            if (selectedAnswer) return; // Prevent multiple selections
-            
-            selectedAnswer = answer;
-            const correctAnswer = quizData[currentQuestion].answer;
-            
-            // Disable all buttons
-            const allButtons = optionsContainer.querySelectorAll('.option-btn');
-            allButtons.forEach(btn => btn.disabled = true);
-            
-            // Style the selected button
-            if (answer === correctAnswer) {
-                buttonElement.classList.add('correct');
-                score++;
+            function startQuiz() {
+                startScreen.classList.add('hidden');
+                quizScreen.classList.remove('hidden');
+                resultScreen.classList.add('hidden');
+                
+                currentQuestion = 0;
+                score = 0;
+                // Soalan dirawakkan di sini
+                shuffledQuestions = [...quizData].sort(() => Math.random() - 0.5);
+                
                 updateScoreCounter();
-            } else {
-                buttonElement.classList.add('incorrect');
-                // Highlight the correct answer
-                allButtons.forEach(btn => {
-                    if (btn.textContent === correctAnswer) {
-                        btn.classList.add('correct');
-                    }
+                loadQuestion();
+            }
+
+            function loadQuestion() {
+                // Tambah animasi fade-in
+                questionContainer.classList.remove('fade-in');
+                void questionContainer.offsetWidth; // Trigger reflow
+                questionContainer.classList.add('fade-in');
+
+                const question = shuffledQuestions[currentQuestion];
+                questionText.textContent = question.question;
+                
+                questionCounter.textContent = `Soalan ${currentQuestion + 1} daripada ${shuffledQuestions.length}`;
+                
+                const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                imageContainer.innerHTML = `<div style="font-size: 3rem; margin-bottom: 1rem;">${question.icon}</div>`;
+                
+                optionsContainer.innerHTML = '';
+                nextBtn.classList.add('hidden');
+                
+                question.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = option;
+                    button.addEventListener('click', () => selectAnswer(option, button));
+                    optionsContainer.appendChild(button);
                 });
             }
-            
-            // Show next button
-            nextBtn.classList.remove('hidden');
-        }
 
-        function nextQuestion() {
-            currentQuestion++;
-            
-            if (currentQuestion < quizData.length) {
-                loadQuestion();
-            } else {
-                showResults();
+            function selectAnswer(answer, buttonElement) {
+                const allButtons = optionsContainer.querySelectorAll('.option-btn');
+                if (allButtons.length > 0 && allButtons[0].disabled) return; 
+
+                const correctAnswer = shuffledQuestions[currentQuestion].answer;
+                
+                allButtons.forEach(btn => btn.disabled = true);
+                
+                if (answer === correctAnswer) {
+                    buttonElement.classList.add('correct');
+                    score++;
+                    updateScoreCounter();
+                } else {
+                    buttonElement.classList.add('incorrect');
+                    allButtons.forEach(btn => {
+                        if (btn.textContent === correctAnswer) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                }
+                
+                nextBtn.classList.remove('hidden');
             }
-        }
 
-        function updateScoreCounter() {
-            scoreCounter.textContent = `Skor: ${score}`;
-        }
-
-        function showResults() {
-            quizScreen.classList.add('hidden');
-            resultScreen.classList.remove('hidden');
-            
-            const percentage = Math.round((score / quizData.length) * 100);
-            scoreText.textContent = `${score}/${quizData.length} (${percentage}%)`;
-            
-            // Set performance message and icon
-            if (percentage >= 90) {
-                resultIcon.textContent = '🏆';
-                performanceText.textContent = 'Cemerlang! Anda sangat memahami hubungan kekeluargaan!';
-            } else if (percentage >= 70) {
-                resultIcon.textContent = '🎉';
-                performanceText.textContent = 'Bagus! Pengetahuan anda tentang keluarga sangat baik!';
-            } else if (percentage >= 50) {
-                resultIcon.textContent = '👍';
-                performanceText.textContent = 'Tidak buruk! Teruskan belajar tentang keluarga!';
-            } else {
-                resultIcon.textContent = '📚';
-                performanceText.textContent = 'Jangan berputus asa! Cuba lagi untuk belajar lebih banyak!';
+            function nextQuestion() {
+                currentQuestion++;
+                if (currentQuestion < shuffledQuestions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
             }
-        }
 
-        function restartQuiz() {
-            resultScreen.classList.add('hidden');
-            startScreen.classList.remove('hidden');
-            currentQuestion = 0;
-            score = 0;
-            selectedAnswer = null;
-        }
+            function updateScoreCounter() {
+                scoreCounter.textContent = `Skor: ${score}`;
+            }
+
+            function showResults() {
+                quizScreen.classList.add('hidden');
+                resultScreen.classList.remove('hidden');
+                
+                const percentage = Math.round((score / shuffledQuestions.length) * 100);
+                scoreText.textContent = `${score}/${shuffledQuestions.length} (${percentage}%)`;
+                
+                if (percentage >= 90) {
+                    resultIcon.textContent = '🏆';
+                    performanceText.textContent = 'Cemerlang! Anda sangat memahami hubungan kekeluargaan!';
+                } else if (percentage >= 70) {
+                    resultIcon.textContent = '🎉';
+                    performanceText.textContent = 'Bagus! Pengetahuan anda tentang keluarga sangat baik!';
+                } else if (percentage >= 50) {
+                    resultIcon.textContent = '👍';
+                    performanceText.textContent = 'Tidak buruk! Teruskan belajar tentang keluarga!';
+                } else {
+                    resultIcon.textContent = '📚';
+                    performanceText.textContent = 'Jangan berputus asa! Cuba lagi untuk belajar lebih banyak!';
+                }
+            }
+
+            function restartQuiz() {
+                startScreen.classList.remove('hidden');
+                resultScreen.classList.add('hidden');
+            }
+        });
     </script>
-
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ab473687aba859',t:'MTc1NDQ0OTE2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
