@@ -1,303 +1,342 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kubeez Calc</title>
+    <title>Kuiz Interaktif: Keluarga Saya Sayang</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Courier+Prime:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
-            font-family: 'Inter', sans-serif; /* Normal, professional font for the calculator */
-            background-color: #111827; /* Dark background */
-            color: #d1d5db; /* Gray text */
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        .page-title {
-            font-family: 'Caveat', cursive; /* Specific font for the main title */
-            text-align: center;
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-top: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        .page-subtitle {
-            font-family: 'Courier Prime', monospace; /* Typewriter font for the subtitle */
-            text-align: center;
-            font-size: 1rem;
-            color: #9ca3af; /* gray-400 */
-            margin-bottom: 1.5rem;
-        }
-        .main-container {
-            background-color: #1f2937; /* Darker card */
+
+        .quiz-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
             border-radius: 1rem;
-            border: 1px solid #374151;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            margin: 1rem auto 3rem auto;
-            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
         }
-        .calculator-content {
-             padding: 2.5rem;
-        }
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        .input-group label {
+
+        .option-btn {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #9ca3af;
-            font-weight: 600;
-        }
-        .input-group input {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #4b5563;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            background-color: #374151;
-            color: #e5e7eb;
-            font-family: 'Inter', sans-serif; /* Ensure inputs use the normal font */
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-group input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
-        }
-        .calculate-button {
-            width: 100%;
-            background-color: #2563eb;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1.125rem;
             padding: 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .calculate-button:hover {
-            background-color: #1d4ed8;
-        }
-        .result-area {
-            margin-top: 2rem;
-            background-color: #111827;
-            border: 1px solid #3b82f6;
+            margin-bottom: 0.75rem;
+            border: 2px solid #e2e8f0;
             border-radius: 0.75rem;
-            padding: 1.5rem;
-            text-align: center;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
         }
-        .result-area h3 {
-            font-size: 1.25rem;
-            color: #93c5fd;
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .option-btn.correct {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #15803d;
             font-weight: 600;
         }
-        .result-area p {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-top: 0.5rem;
+
+        .option-btn.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #b91c1c;
+            font-weight: 600;
         }
-        .tab-nav {
-            display: flex;
-            background-color: #374151;
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
         }
-        .tab-button {
-            flex-grow: 1;
-            padding: 1rem;
-            text-align: center;
-            font-weight: 700;
-            color: #9ca3af;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+
+        .family-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
         }
-        .tab-button.active {
-            color: #ffffff;
-            background-color: #1f2937;
-            border-bottom-color: #2563eb;
+
+        .progress-animation {
+            transition: width 0.5s ease-in-out;
         }
-        .calculator-body {
-            display: none;
+
+        /* Animasi Fade-in untuk soalan baru */
+        #question-container.fade-in {
+            animation: fadeIn 0.5s ease-in-out;
         }
-        .calculator-body.active {
-            display: block;
-        }
-        .footer {
-            text-align: center;
-            padding-bottom: 2rem;
-            color: #4b5563; /* gray-600 */
-            font-size: 0.875rem;
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <h1 class="page-title">Kubeez Calc</h1>
-    <p class="page-subtitle">"from Papa to Mami🍬"</p>
-
-    <div class="main-container">
-        <div class="tab-nav">
-            <button class="tab-button active" data-tab="pump-kw">Pump KW</button>
-            <button class="tab-button" data-tab="pipe-size">Pipe Size</button>
+    <div id="quiz-app" class="quiz-container text-center">
+        
+        <div id="start-screen">
+            <div class="family-icon">👨‍👩‍👧‍👦</div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Kuiz Keluarga Saya</h1>
+            <p class="text-gray-600 mb-8">Uji pengetahuan anda tentang ahli keluarga dan hubungan kekeluargaan!</p>
+            <button id="start-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                🚀 Mula Kuiz
+            </button>
         </div>
 
-        <!-- Pump KW Calculator -->
-        <div id="pump-kw" class="calculator-body active">
-            <div class="calculator-content">
-                <header class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-white">Pump KW</h2>
-                    <p class="text-gray-400 mt-1">Based on the formula: (ρ * g * Q * H) / (1000 * ηp)</p>
-                </header>
-                <div class="input-group">
-                    <label for="density">ρ = Fluid Density (kg/m³)</label>
-                    <input type="number" id="density" value="1000">
-                </div>
-                <div class="input-group">
-                    <label for="flowRateKW">Q = Flow Rate (m³/hr)</label>
-                    <input type="number" id="flowRateKW" value="150">
-                </div>
-                <div class="input-group">
-                    <label for="totalHead">H = Total Dynamic Head (m)</label>
-                    <input type="number" id="totalHead" value="25">
-                </div>
-                <div class="input-group">
-                    <label for="pumpEfficiency">ηp = Pump Efficiency (%)</label>
-                    <input type="number" id="pumpEfficiency" value="75">
-                </div>
-                <button id="calculateKWBtn" class="calculate-button">Calculate Pump kW</button>
-                <div id="resultKW" class="result-area" style="display: none;">
-                    <h3>Pump Power</h3>
-                    <p id="powerResult">-- kW</p>
-                </div>
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <span id="question-counter" class="text-sm font-semibold text-gray-600"></span>
+                <span id="score-counter" class="text-sm font-semibold text-blue-600">Skor: 0</span>
             </div>
+            <div id="progress-container" class="w-full bg-gray-200 rounded-full h-3 mb-6">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-animation" style="width: 0%"></div>
+            </div>
+            <div id="question-container" class="text-left">
+                <h2 id="question-text" class="text-xl font-semibold text-gray-800 mb-6"></h2>
+                <div id="image-container" class="mb-4 text-center"></div>
+                <div id="options-container"></div>
+            </div>
+            <button id="next-btn" class="w-full mt-6 bg-gray-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-900 transition-all duration-300 hidden">
+                Seterusnya ➡️
+            </button>
         </div>
 
-        <!-- Pipe Sizing Calculator -->
-        <div id="pipe-size" class="calculator-body">
-            <div class="calculator-content">
-                <header class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-white">Pipe Size</h2>
-                    <p class="text-gray-400 mt-1">Calculates diameter based on flow and velocity.</p>
-                </header>
-                <div class="input-group">
-                    <label for="flowRatePipe">Flow Rate (m³/hr)</label>
-                    <input type="number" id="flowRatePipe" value="150">
-                </div>
-                <div class="input-group">
-                    <label for="velocity">Target Fluid Velocity (m/s)</label>
-                    <input type="number" id="velocity" value="2">
-                </div>
-                <button id="calculatePipeBtn" class="calculate-button">Calculate Pipe Diameter</button>
-                <div id="resultPipe" class="result-area" style="display: none;">
-                    <h3>Required Internal Diameter</h3>
-                    <div class="flex justify-around items-start mt-4">
-                        <div class="text-center">
-                            <p id="diameterResultMM" class="text-4xl">--</p>
-                            <span class="text-sm text-gray-400">mm</span>
-                        </div>
-                        <div class="text-center">
-                            <p id="diameterResultInches" class="text-4xl">--</p>
-                            <span class="text-sm text-gray-400">inches</span>
-                        </div>
-                    </div>
-                </div>
+        <div id="result-screen" class="hidden">
+            <div id="result-icon" class="text-6xl mb-4"></div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Tahniah!</h1>
+            <p class="text-lg text-gray-600 mb-6">Anda telah menyelesaikan kuiz keluarga.</p>
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-6">
+                <p class="text-4xl font-bold mb-2">Skor Anda: <span id="score-text" class="text-blue-600"></span></p>
+                <p id="performance-text" class="text-lg text-gray-600"></p>
             </div>
+            <button id="restart-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                🔄 Cuba Lagi
+            </button>
         </div>
+
     </div>
 
-    <footer class="footer">
-        <p>Created by SamiL©️ 2025</p>
-    </footer>
-
     <script>
-        // Tab functionality
-        const tabs = document.querySelectorAll('.tab-button');
-        const calculators = document.querySelectorAll('.calculator-body');
+        document.addEventListener('DOMContentLoaded', () => {
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(item => item.classList.remove('active'));
-                tab.classList.add('active');
-
-                const target = tab.getAttribute('data-tab');
-                calculators.forEach(calc => {
-                    if (calc.id === target) {
-                        calc.classList.add('active');
-                    } else {
-                        calc.classList.remove('active');
-                    }
-                });
-            });
-        });
-
-        // Pump KW Calculator Logic
-        document.getElementById('calculateKWBtn').addEventListener('click', () => {
-            try {
-                const density = parseFloat(document.getElementById('density').value);
-                const flowRateM3H = parseFloat(document.getElementById('flowRateKW').value);
-                const totalHeadM = parseFloat(document.getElementById('totalHead').value);
-                const efficiencyPercent = parseFloat(document.getElementById('pumpEfficiency').value);
-
-                if (isNaN(density) || isNaN(flowRateM3H) || isNaN(totalHeadM) || isNaN(efficiencyPercent)) {
-                    alert('Please enter valid numbers in all fields.');
-                    return;
+            const quizData = [
+                {
+                    question: "Siapakah ibu kepada ibu kita?",
+                    options: ["Kakak", "Nenek", "Adik"],
+                    answer: "Nenek",
+                    icon: "👵"
+                },
+                {
+                    question: "Anak lelaki kepada ibu bapa kita dipanggil...",
+                    options: ["Abang", "Adik lelaki", "Sepupu"],
+                    answer: "Adik lelaki",
+                    icon: "👦"
+                },
+                {
+                    question: "Siapakah suami kepada ibu kita?",
+                    options: ["Pakcik", "Bapa", "Datuk"],
+                    answer: "Bapa",
+                    icon: "👨"
+                },
+                {
+                    question: "Anak perempuan kpd adik-beradik ibu/bapa kita dipanggil...",
+                    options: ["Sepupu", "Kakak", "Nenek"],
+                    answer: "Sepupu",
+                    icon: "👧"
+                },
+                {
+                    question: "Siapakah abang kepada ibu atau bapa kita?",
+                    options: ["Datuk", "Pakcik", "Sepupu"],
+                    answer: "Pakcik",
+                    icon: "👨‍🦱"
+                },
+                {
+                    question: "Ibu kepada suami atau isteri kita dipanggil...",
+                    options: ["Mertua", "Nenek", "Makcik"],
+                    answer: "Mertua",
+                    icon: "👩‍🦳"
+                },
+                {
+                    question: "Anak kepada anak kita dipanggil...",
+                    options: ["Sepupu", "Cucu", "Cicit"],
+                    answer: "Cucu",
+                    icon: "👶"
+                },
+                {
+                    question: "Adik perempuan kepada ibu atau bapa kita dipanggil...",
+                    options: ["Makcik", "Kakak", "Sepupu"],
+                    answer: "Makcik",
+                    icon: "👩"
+                },
+                {
+                    question: "Bapa kepada bapa kita dipanggil...",
+                    options: ["Moyang", "Pak Long", "Datuk"],
+                    answer: "Datuk",
+                    icon: "👴"
+                },
+                {
+                    question: "Adik-beradik kepada isteri atau suami kita dipanggil...",
+                    options: ["Sepupu", "Ipar", "Birasan"],
+                    answer: "Ipar",
+                    icon: "🧑‍🤝‍🧑"
                 }
-                if (efficiencyPercent <= 0) {
-                    alert('Pump Efficiency must be greater than zero.');
-                    return;
-                }
+            ];
 
-                const gravity = 9.81;
-                const flowRateM3S = flowRateM3H / 3600;
-                const efficiencyDecimal = efficiencyPercent / 100;
+            let currentQuestion = 0;
+            let score = 0;
+            let shuffledQuestions = [];
 
-                const powerKW = (density * gravity * flowRateM3S * totalHeadM) / (1000 * efficiencyDecimal);
+            // DOM elements
+            const startScreen = document.getElementById('start-screen');
+            const quizScreen = document.getElementById('quiz-screen');
+            const resultScreen = document.getElementById('result-screen');
+            const startBtn = document.getElementById('start-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const questionContainer = document.getElementById('question-container');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const progressBar = document.getElementById('progress-bar');
+            const scoreText = document.getElementById('score-text');
+            const questionCounter = document.getElementById('question-counter');
+            const scoreCounter = document.getElementById('score-counter');
+            const imageContainer = document.getElementById('image-container');
+            const resultIcon = document.getElementById('result-icon');
+            const performanceText = document.getElementById('performance-text');
 
-                document.getElementById('powerResult').textContent = `${powerKW.toFixed(2)} kW`;
-                document.getElementById('resultKW').style.display = 'block';
+            // Event listeners
+            startBtn.addEventListener('click', startQuiz);
+            nextBtn.addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restartQuiz);
 
-            } catch (error) {
-                alert(`An error occurred: ${error.message}`);
+            function startQuiz() {
+                startScreen.classList.add('hidden');
+                quizScreen.classList.remove('hidden');
+                resultScreen.classList.add('hidden');
+                
+                currentQuestion = 0;
+                score = 0;
+                // Soalan dirawakkan di sini
+                shuffledQuestions = [...quizData].sort(() => Math.random() - 0.5);
+                
+                updateScoreCounter();
+                loadQuestion();
             }
-        });
 
-        // Pipe Sizing Calculator Logic
-        document.getElementById('calculatePipeBtn').addEventListener('click', () => {
-            try {
-                const flowRateM3H = parseFloat(document.getElementById('flowRatePipe').value);
-                const velocity = parseFloat(document.getElementById('velocity').value);
+            function loadQuestion() {
+                // Tambah animasi fade-in
+                questionContainer.classList.remove('fade-in');
+                void questionContainer.offsetWidth; // Trigger reflow
+                questionContainer.classList.add('fade-in');
 
-                if (isNaN(flowRateM3H) || isNaN(velocity)) {
-                    alert('Please enter valid numbers in all fields.');
-                    return;
-                }
-                if (velocity <= 0) {
-                    alert('Velocity must be greater than zero.');
-                    return;
-                }
-
-                const flowRateM3S = flowRateM3H / 3600;
+                const question = shuffledQuestions[currentQuestion];
+                questionText.textContent = question.question;
                 
-                // Formula: Area = Q / v
-                const area = flowRateM3S / velocity;
+                questionCounter.textContent = `Soalan ${currentQuestion + 1} daripada ${shuffledQuestions.length}`;
                 
-                // Formula: D = sqrt(4 * Area / PI)
-                const diameterM = Math.sqrt((4 * area) / Math.PI);
-                const diameterMM = diameterM * 1000;
-                const diameterInches = diameterMM / 25.4; // Conversion to inches
+                const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                imageContainer.innerHTML = `<div style="font-size: 3rem; margin-bottom: 1rem;">${question.icon}</div>`;
+                
+                optionsContainer.innerHTML = '';
+                nextBtn.classList.add('hidden');
+                
+                question.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = option;
+                    button.addEventListener('click', () => selectAnswer(option, button));
+                    optionsContainer.appendChild(button);
+                });
+            }
 
-                document.getElementById('diameterResultMM').textContent = `${diameterMM.toFixed(1)}`;
-                document.getElementById('diameterResultInches').textContent = `${diameterInches.toFixed(2)}`;
-                document.getElementById('resultPipe').style.display = 'block';
+            function selectAnswer(answer, buttonElement) {
+                const allButtons = optionsContainer.querySelectorAll('.option-btn');
+                if (allButtons.length > 0 && allButtons[0].disabled) return; 
 
-            } catch (error) {
-                alert(`An error occurred: ${error.message}`);
+                const correctAnswer = shuffledQuestions[currentQuestion].answer;
+                
+                allButtons.forEach(btn => btn.disabled = true);
+                
+                if (answer === correctAnswer) {
+                    buttonElement.classList.add('correct');
+                    score++;
+                    updateScoreCounter();
+                } else {
+                    buttonElement.classList.add('incorrect');
+                    allButtons.forEach(btn => {
+                        if (btn.textContent === correctAnswer) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                }
+                
+                nextBtn.classList.remove('hidden');
+            }
+
+            function nextQuestion() {
+                currentQuestion++;
+                if (currentQuestion < shuffledQuestions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }
+
+            function updateScoreCounter() {
+                scoreCounter.textContent = `Skor: ${score}`;
+            }
+
+            function showResults() {
+                quizScreen.classList.add('hidden');
+                resultScreen.classList.remove('hidden');
+                
+                const percentage = Math.round((score / shuffledQuestions.length) * 100);
+                scoreText.textContent = `${score}/${shuffledQuestions.length} (${percentage}%)`;
+                
+                if (percentage >= 90) {
+                    resultIcon.textContent = '🏆';
+                    performanceText.textContent = 'Cemerlang! Anda sangat memahami hubungan kekeluargaan!';
+                } else if (percentage >= 70) {
+                    resultIcon.textContent = '🎉';
+                    performanceText.textContent = 'Bagus! Pengetahuan anda tentang keluarga sangat baik!';
+                } else if (percentage >= 50) {
+                    resultIcon.textContent = '👍';
+                    performanceText.textContent = 'Tidak buruk! Teruskan belajar tentang keluarga!';
+                } else {
+                    resultIcon.textContent = '📚';
+                    performanceText.textContent = 'Jangan berputus asa! Cuba lagi untuk belajar lebih banyak!';
+                }
+            }
+
+            function restartQuiz() {
+                startScreen.classList.remove('hidden');
+                resultScreen.classList.add('hidden');
             }
         });
     </script>
-
 </body>
 </html>
